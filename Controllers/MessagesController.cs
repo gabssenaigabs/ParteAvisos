@@ -11,7 +11,6 @@ using CondoHub.Models.ViewModels;
 
 namespace CondoHub.Controllers
 {
-    [Authorize]
     public class MessagesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,6 +23,7 @@ namespace CondoHub.Controllers
         }
 
 
+        [AllowAnonymous]
         public async Task<IActionResult> Mural()
         {
             var avisos = _context.Set<Messages>().OrderByDescending(a => a.DataPublicacao).ToList();
@@ -45,6 +45,7 @@ namespace CondoHub.Controllers
         }
 
 
+        [HttpGet]
         public IActionResult CriarAviso()
         {
             return View();
@@ -52,7 +53,7 @@ namespace CondoHub.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CriarAviso(Messages aviso)
+        public async Task<IActionResult> CriarAviso(Messages aviso, IFormFile? ImagemPath)
         {
             if (ModelState.IsValid)
             {
@@ -62,6 +63,26 @@ namespace CondoHub.Controllers
                     ModelState.AddModelError(string.Empty, "Usuário não encontrado.");
                     return View(aviso);
                 }
+                
+                if (ImagemPath != null && ImagemPath.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+                    
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ImagemPath.FileName);
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ImagemPath.CopyToAsync(stream);
+                    }
+                    
+                    aviso.ImagemPath = fileName;
+                }
+                
                 aviso.UsuarioId = user.Id;
                 aviso.DataPublicacao = DateTime.Now;
                 _context.Add(aviso);
