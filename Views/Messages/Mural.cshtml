@@ -1,46 +1,7 @@
-<!-- Modal de Novo Aviso -->
+@model IEnumerable<CondoHub.Models.ViewModels.AvisoMuralViewModel>
 @{
     var avisoNovo = new CondoHub.Models.Entities.Messages();
 }
-<div id="modalNovoAviso" class="modal-aviso-overlay" style="display:none;">
-    <div class="modal-aviso-card">
-        <div class="modal-aviso-header">
-            <span class="modal-aviso-title">Criar Novo Aviso</span>
-            <button type="button" class="close-modal-aviso" id="fecharModalAviso" aria-label="Fechar">&times;</button>
-        </div>
-        <div class="modal-aviso-subtitle">Publique um comunicado para todos os moradores</div>
-        @using (Html.BeginForm("CriarAviso", "Messages", FormMethod.Post, new { enctype = "multipart/form-data" }))
-        {
-            @Html.AntiForgeryToken()
-            @Html.HiddenFor(m => avisoNovo.Id)
-            <div class="form-group">
-                <label for="Titulo">Título</label>
-                @Html.TextBoxFor(m => avisoNovo.Titulo, new { @class = "form-control", placeholder = "Título do aviso" })
-                @Html.ValidationMessageFor(m => avisoNovo.Titulo, "", new { @class = "text-danger" })
-            </div>
-            <div class="form-group">
-                <label for="Mensagem">Mensagem</label>
-                @Html.TextAreaFor(m => avisoNovo.Mensagem, new { @class = "form-control", placeholder = "Escreva o comunicado aqui..." })
-                @Html.ValidationMessageFor(m => avisoNovo.Mensagem, "", new { @class = "text-danger" })
-            </div>
-            <div class="form-group">
-                <label>Tipo de Aviso</label>
-                @Html.DropDownListFor(m => avisoNovo.Tipo, Html.GetEnumSelectList<CondoHub.Models.Entities.TipoAviso>(), new
-                { @class = "form-control" })
-            @Html.ValidationMessageFor(m => avisoNovo.Tipo, "", new { @class = "text-danger" })
-        </div>
-        <div class="form-group">
-            <label for="ImagemPath">Adicionar imagem</label>
-            <input type="file" name="ImagemPath" class="form-control" />
-        </div>
-        <div class="d-flex justify-content-between mt-4">
-            <button type="button" class="btn btn-secondary" id="cancelarModalAviso">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Publicar</button>
-        </div>
-                }
-    </div>
-</div>
-@model IEnumerable<CondoHub.Models.ViewModels.AvisoMuralViewModel>
 @{
     ViewData["Title"] = "Mural de Avisos";
 }
@@ -82,7 +43,6 @@
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     }
 
-    /* Animação do modal */
     keyframes modalShowAviso {
         from {
             opacity: 0;
@@ -134,7 +94,7 @@
             </div>
             <div class="form-group">
                 <label for="Mensagem">Mensagem</label>
-                @Html.TextAreaFor(m => avisoNovo.Mensagem, new { @class = "form-control", placeholder = "Escreva o       comunicado aqui..." })
+                @Html.TextAreaFor(m => avisoNovo.Mensagem, new { @class = "form-control", placeholder = "Escreva o          comunicado aqui..." })
                 @Html.ValidationMessageFor(m => avisoNovo.Mensagem, "", new { @class = "text-danger" })
             </div>
             <div class="form-group">
@@ -161,7 +121,7 @@
         <div class="avisos-list d-flex flex-column gap-4">
             @foreach (var aviso in Model.OrderByDescending(a => a.DataPublicacao))
             {
-                <div class="aviso-card bg-white shadow-sm rounded-4 mx-auto" style="width:700px; max-width:98vw;">
+                <div class="aviso-card bg-white shadow-sm rounded-4 mx-auto" style="width:700px; max-width:96vw;">
                     <div class="d-flex align-items-center p-3 pb-0" style="position:relative;">
                         <div class="aviso-avatar me-3"
                             style="width:48px; height:48px; border-radius:50%; background:#e3edff; display:flex; align-items:center; justify-content:center; font-weight:600; color:#4a6cf7; font-size:1.2rem;">
@@ -169,28 +129,27 @@
                                                         "U").Length)).ToUpper())</span>
                         </div>
                         <div class="d-flex flex-column">
-                            <div>
+                            <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="font-weight:500; font-size:16px;">@aviso.UsuarioNome</span>
-                                <span class="badge badge-secondary ms-2"
-                                    style="font-size:12px;vertical-align:middle;">@aviso.UsuarioTipo</span>
+                                <span
+                                    style="background:#f0f0f0; color:#333; font-size:12px; font-weight:500; padding:4px 12px; border-radius:6px; white-space:nowrap;">@aviso.UsuarioTipo</span>
                             </div>
-                            <div style="font-size:13px; color:#888; margin-top:2px;">@aviso.DataPublicacao.ToString("dd/MM/yy              'às' HH:mm")</div>
+                            <div style="font-size:13px; color:#888; margin-top:2px;">@aviso.DataPublicacao.ToString("dd/MM/yy    'às' HH:mm")</div>
                         </div>
                         <div style="position:absolute;top:8px;right:16px;">
                             <span class="badge aviso-tipo"
                                 style="background:@GetTipoCor(aviso.Tipo); color:#fff; font-size:0.95em; padding:6px 18px; border-radius:8px;">@aviso.Tipo</span>
                         </div>
                     </div>
-                    <div class="px-3 pt-2">
+                    <div class="px-3 pt-2 pb-3">
                         <div class="fw-semibold" style="font-size:1.15rem;">@aviso.Titulo</div>
-                        <div class="text-dark" style="font-size:1rem;">@aviso.Mensagem</div>
+                        <div class="text-dark" style="font-size:1rem; margin-bottom:12px;">@aviso.Mensagem</div>
                     </div>
                     @if (!string.IsNullOrEmpty(aviso.ImagemPath))
                     {
-                        <div class="aviso-img-area d-flex justify-content-center align-items-center"
-                            style="background:#f5f5f5; min-height:160px;">
-                            <img src="@Url.Content(aviso.ImagemPath)" alt="Imagem do aviso"
-                                style="max-width:100%; max-height:180px; border-radius:8px;" />
+                        <div class="aviso-img-area" style="width:100%; height:300px; overflow:hidden; border-radius:0 0 20px 20px;">
+                            <img src="~/uploads/@aviso.ImagemPath" alt="Imagem do aviso"
+                                style="width:100%; height:100%; display:block; object-fit:cover;" />
                         </div>
                     }
                 </div>
